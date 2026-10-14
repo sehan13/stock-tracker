@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit product' if product else 'New product' }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'Edit ' ~ product.name if product else 'Add a product' }}</h1>
+</div>
+
+<form class="panel form" method="post">
+  <div class="form-grid">
+    <label>SKU <input name="sku" value="{{ form.sku or '' }}" required maxlength="40" placeholder="e.g. BTH-001"></label>
+    <label>Name <input name="name" value="{{ form.name or '' }}" required maxlength="120"></label>
+    <label>Category <input name="category" value="{{ form.category or '' }}" required maxlength="60" placeholder="e.g. Taps"></label>
+    {% if not product %}
+      <label>Opening quantity <input name="quantity" type="number" min="0" step="1" value="{{ form.quantity or 0 }}" required></label>
+    {% endif %}
+    <label>Reorder level <input name="reorder_level" type="number" min="0" step="1" value="{{ form.reorder_level if form.reorder_level is not none else 10 }}" required></label>
+    <label>Unit price (£) <input name="unit_price" type="number" min="0" step="0.01" value="{{ form.unit_price or '' }}" required></label>
+  </div>
+  {% if product %}<p class="muted small">To change the quantity, use “Record stock movement” on the product page, so every change is logged.</p>{% endif %}
+  <div class="form-actions">
+    <button class="btn" type="submit">{{ 'Save changes' if product else 'Add product' }}</button>
+    <a class="btn btn-ghost" href="{{ url_for('stock.product_detail', product_id=product.id) if product else url_for('stock.products') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Import CSV{% endblock %}
+
+{% block content %}
+<div class="page-head"><h1>Import products from CSV</h1></div>
+
+<div class="grid-2">
+  <form class="panel form" method="post" enctype="multipart/form-data">
+    <h2>Upload a file</h2>
+    <input type="file" name="file" accept=".csv" required>
+    <button class="btn" type="submit">Import</button>
+    <p class="muted small">New SKUs are added. Existing SKUs are updated, and any quantity difference is logged as a stock movement.</p>
+  </form>
+
+  <section class="panel">
+    <h2>Required columns</h2>
+    <pre class="code">sku,name,category,quantity,reorder_level,unit_price
+BTH-001,Chrome Basin Mixer Tap,Taps,24,10,49.99</pre>
+    <p class="muted small">Rows with missing or invalid values are skipped and listed below, so you can fix them and re-upload.</p>
+  </section>
+</div>
+
+{% if result %}
+<section class="panel">
+  <h2>Import report</h2>
+  <p><strong>{{ result.added }}</strong> added · <strong>{{ result.updated }}</strong> updated · <strong>{{ result.errors | length }}</strong> rows skipped</p>
+  {% if result.errors %}
+    <ul class="error-list">{% for e in result.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

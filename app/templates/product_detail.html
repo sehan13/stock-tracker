@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="muted mono">{{ product.sku }} · {{ product.category }}</p>
+    <h1>{{ product.name }}</h1>
+  </div>
+  <div class="actions">
+    <a class="btn btn-ghost" href="{{ url_for('stock.edit_product', product_id=product.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('stock.delete_product', product_id=product.id) }}"
+          onsubmit='return confirm({{ ("Delete " ~ product.name ~ " and its history?") | tojson }});'>
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<section class="kpis">
+  <div class="kpi {{ 'kpi-alert' if product.quantity <= product.reorder_level }}"><span class="kpi-label">In stock</span><span class="kpi-value">{{ product.quantity }}</span></div>
+  <div class="kpi"><span class="kpi-label">Reorder level</span><span class="kpi-value">{{ product.reorder_level }}</span></div>
+  <div class="kpi"><span class="kpi-label">Unit price</span><span class="kpi-value">{{ product.unit_price | gbp }}</span></div>
+  <div class="kpi"><span class="kpi-label">Stock value</span><span class="kpi-value">{{ (product.quantity * product.unit_price) | gbp }}</span></div>
+</section>
+
+<div class="grid-2">
+  <form class="panel form" method="post" action="{{ url_for('stock.add_movement', product_id=product.id) }}">
+    <h2>Record stock movement</h2>
+    <div class="segmented">
+      <label><input type="radio" name="direction" value="in" checked> Stock in</label>
+      <label><input type="radio" name="direction" value="out"> Stock out</label>
+    </div>
+    <label>Quantity <input type="number" name="quantity" min="1" step="1" required></label>
+    <label>Reason <input name="reason" required maxlength="120" placeholder="e.g. Supplier delivery, Customer order #1234"></label>
+    <button class="btn" type="submit">Save movement</button>
+  </form>
+
+  <section class="panel">
+    <h2>History</h2>
+    {% include "_movements_table.html" with context %}
+  </section>
+</div>
+{% endblock %}

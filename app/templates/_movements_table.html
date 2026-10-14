@@ -1,0 +1,20 @@
+{% set rows = movements if movements is defined else stats.recent %}
+{% if rows %}
+<div class="table-scroll">
+<table>
+  <thead><tr><th>When</th>{% if not product %}<th>Product</th>{% endif %}<th class="num">Change</th><th>Reason</th></tr></thead>
+  <tbody>
+  {% for m in rows %}
+    <tr>
+      <td class="muted small">{{ m.created_at }}</td>
+      {% if not product %}<td><a href="{{ url_for('stock.product_detail', product_id=m.product_id) }}">{{ m.name }}</a></td>{% endif %}
+      <td class="num {{ 'pos' if m.change > 0 else 'neg' }}">{{ '%+d' % m.change }}</td>
+      <td>{{ m.reason }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">No stock movements yet.</p>
+{% endif %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Dashboard</h1>
+  <a class="btn btn-ghost" href="{{ url_for('stock.export_csv') }}">⬇ Export stock report</a>
+</div>
+
+<section class="kpis">
+  <div class="kpi"><span class="kpi-label">Products</span><span class="kpi-value">{{ stats.totals.products }}</span></div>
+  <div class="kpi"><span class="kpi-label">Units in stock</span><span class="kpi-value">{{ "{:,}".format(stats.totals.units) }}</span></div>
+  <div class="kpi"><span class="kpi-label">Stock value</span><span class="kpi-value">{{ stats.totals.value | gbp }}</span></div>
+  <a class="kpi kpi-alert {{ 'is-zero' if stats.totals.low == 0 }}" href="{{ url_for('stock.products', low=1) }}">
+    <span class="kpi-label">Low stock</span><span class="kpi-value">{{ stats.totals.low }}</span>
+  </a>
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Stock value by category</h2>
+    {% if stats.by_category %}
+      {% set max_value = stats.by_category[0].value or 1 %}
+      <ul class="bars">
+        {% for c in stats.by_category %}
+          <li>
+            <span class="bar-label">{{ c.category }}</span>
+            <span class="bar-track"><span class="bar" style="width: {{ (c.value / max_value * 100) | round(1) }}%"></span></span>
+            <span class="bar-value">{{ c.value | gbp }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No products yet. <a href="{{ url_for('stock.import_csv') }}">Import a CSV</a> to get started.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Needs reordering</h2>
+    {% if stats.low_stock %}
+      <table>
+        <thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Reorder at</th></tr></thead>
+        <tbody>
+        {% for p in stats.low_stock %}
+          <tr>
+            <td><a href="{{ url_for('stock.product_detail', product_id=p.id) }}">{{ p.name }}</a><br><span class="muted small">{{ p.sku }}</span></td>
+            <td class="num"><span class="badge badge-low">{{ p.quantity }}</span></td>
+            <td class="num">{{ p.reorder_level }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">All products are above their reorder level. ✅</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Recent stock movements</h2>
+  {% include "_movements_table.html" with context %}
+</section>
+{% endblock %}
