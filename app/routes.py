@@ -129,4 +129,6 @@ def export_csv():
 
 @bp.app_errorhandler(404)
 def not_found(e):
+    if request.path.startswith("/api/"):
+        return {"error": "Not found."}, 404
     return render_template("404.html"), 404

@@ -10,6 +10,7 @@ from flask import Flask
 
 from . import db
 from .routes import bp
+from .api import api
 
 
 def create_app(test_config=None):
@@ -28,6 +29,7 @@ def create_app(test_config=None):
 
     db.init_app(app)          # register database helpers + CLI commands
     app.register_blueprint(bp)  # register all the pages (routes)
+    app.register_blueprint(api)  # register the JSON REST API (/api/...)
 
     # Make sure the tables exist the first time the app runs.
     with app.app_context():
